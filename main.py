@@ -13,8 +13,8 @@ for c in range(-6,7):
  t=abs(c)
  for q in range(128):
   if q&136==0:
-   f=q&7;r=q>>4;i=(7-r if c>0 else r)*4+min(f,7-f)
-   P[c*128+q+768]=(V[t]+Z[divmod(ord(J[(t-1)*16+i//2])-48,8)[i%2]])*(1 if c>0 else -1)
+   f=q&7;r=q>>4;i=(r,7-r)[c>0]*4+min(f,7-f)
+   P[c*128+q+768]=(V[t]+Z[divmod(ord(J[(t-1)*16+i//2])-48,8)[i&1]])*(c>0 or -1)
 Q=lambda c,q:P[c*128+q+768]
 G=int(os.getenv('BUDGET')or 15e4)
 O=1e5
@@ -27,19 +27,19 @@ def F(f):
   if ch=='/':q-=24
   elif ch.isdigit():q+=int(ch)
   else:
-   c=('PNBRQK'.index(ch.upper())+1)*((ch<'a')*2-1);B[q]=c;C+=Q(c,q);q+=1
- s=2*(p[1]=='w')-1
+   c=('PNBRQK'.index(ch.upper())+1)*(ch<'a'or-1);B[q]=c;C+=Q(c,q);q+=1
+ s=(p[1]=='w')or-1
  a=sum(1<<i for i,h in enumerate('KQkq') if h in p[2])
- e=-1 if p[3]=='-' else (int(p[3][1])-1)*16+ord(p[3][0])-97
+ e=-1 if p[3]=='-' else (int(p[3][1])-1)<<4+ord(p[3][0])-97
  return B,s,e,a,C
 def A(B,s,q):
  for d in(-17,-15):
   t=q+d*s
-  if t&136==0 and B[t]==s:return 1
+  if t&136<1 and B[t]==s:return 1
  for v in(2,3,4,6):
   for d in W[v]:
    t=q+d
-   while t&136==0:
+   while t&136<1:
     x=B[t]
     if x:
      if x==v*s or 2<v<5 and x==5*s:return 1
@@ -55,26 +55,26 @@ def E(B,s,e,a):
   if not p or p*s<=0:continue
   t=abs(p)
   if t==1:
-   d=16*s;j=(7-5*s)//2
+   d=16*s;j=(1,6)[s<0]
    w=q+d
-   if w&136==0 and B[w]==0:
+   if w&136<1 and B[w]==0:
     X(q,w,0)
     if q>>4==j:
      x=w+d
-     if x&136==0 and B[x]==0:X(q,x,0)
+     if x&136<1 and B[x]==0:X(q,x,0)
    for z in(d-1,d+1):
     w=q+z
-    if w&136==0:
+    if w&136<1:
      x=B[w]
-     if x*s<0 and abs(x)<6:X(q,w,10*V[abs(x)])
+     if x*s<0 and abs(x)<6:X(q,w,10*V[abs(x)]-100)
      elif w==e and not x:X(q,w,1900)
   else:
    for z in W[t]:
     w=q+z
-    while w&136==0:
+    while w&136<1:
      x=B[w]
      if x:
-      if x*s<0 and abs(x)<6:o((10*V[abs(x)],q|w<<7))
+      if x*s<0 and abs(x)<6:o((10*V[abs(x)]-V[t],q|w<<7))
       break
      o((0,q|w<<7))
      if t%4==2:break
@@ -107,14 +107,14 @@ def S(B,s,e,a,C,d,x,y,p):
   v=-S(B,-s,-1,a,C,d-3,-y,1-y,p+1)
   if v>=y:return v
  t=T.get(k:=(tuple(B),s,e,a));h=0
- if t and t[0]>=d and not(t[2]==1 and t[1]<y or t[2]==2 and t[1]>x):return t[1]
+ if t and t[0]>=d and not(t[2]&1 and t[1]<y or t[2]&2 and t[1]>x):return t[1]
  if t:h=t[3]
  if q:
   v=C*s
   if v>=y:return v
   if v>x:x=v
  z=E(B,s,e,a);f=g=0;a0=x
- z.sort(key=lambda t:2*(t[1]==h)+(t[1] in K[p]),reverse=1)
+ z.sort(key=lambda t:2*(t[1]==h)+(t[1]in K[p]),reverse=1)
  for u,m in z:
   if q and u<=0:continue
   n,D,w,i=M(B,s,m,e,a,C)
